@@ -24,14 +24,17 @@ module.exports = grammar({
     include_stmt: $ => seq(CI('@include'), $.C_STR_LIT),
     opt_stmt_list: $ => $.stmt_list,
     non_expr_macro_ref: $ => choice($.stmt_list_macro_ref, $.cte_tables_macro_ref, $.select_core_macro_ref, $.select_expr_macro_ref, $.query_parts_macro_ref),
-    macro_ref: $ => prec.left(1, choice(seq($.ID, '!'), seq($.ID, '!', '(', optional($.opt_macro_args), ')'), seq($.basic_expr, ':', $.ID, '!', '(', optional($.opt_macro_args), ')'), seq($.basic_expr, ':', $.ID, '!'))),
-    expr_macro_ref: $ => prec(100, $.macro_ref),
-    query_parts_macro_ref: $ => prec(2, $.macro_ref),
-    cte_tables_macro_ref: $ => prec(3, $.macro_ref),
-    select_core_macro_ref: $ => prec(4, $.macro_ref),
-    select_expr_macro_ref: $ =>  prec(5,  $.macro_ref),
-    stmt_list_macro_ref: $ => prec(6, $.macro_ref),
-    stmt_list: $ => repeat1(choice(seq($.stmt, ';'), $.include_stmt, $.comment, $.line_directive, $.macro)),
+
+    expr_macro_ref: $ => prec.left(1,choice(seq($.ID_BANG), seq($.ID_BANG, '(', $.opt_macro_args, ')'), seq($.basic_expr, ':', $.ID_BANG, '(', optional($.opt_macro_args), ')'), seq($.basic_expr, ':', $.ID_BANG))),
+    macro_ref: $ => choice(seq($.ID_BANG), seq($.ID_BANG, '(', $.opt_macro_args, ')')),
+
+    query_parts_macro_ref: $ => prec(1, $.macro_ref),
+    cte_tables_macro_ref: $ => prec(2, $.macro_ref),
+    select_core_macro_ref: $ => prec(3, $.macro_ref),
+    select_expr_macro_ref: $ => prec(4, $.macro_ref),
+    stmt_list_macro_ref: $ => prec(5, $.macro_ref),
+
+    stmt_list: $ => repeat1(choice($.stmt, $.include_stmt, $.comment, $.line_directive, $.macro)),
     stmt: $ => seq(optional($.misc_attrs), $.any_stmt, ';'),
     expr_stmt: $ => $.expr,
     any_stmt: $ => choice($.alter_table_add_column_stmt, $.expr_stmt, $.begin_schema_region_stmt, $.begin_trans_stmt, $.blob_get_key_type_stmt, $.blob_get_val_type_stmt, $.blob_get_key_stmt, $.blob_get_val_stmt, $.blob_create_key_stmt, $.blob_create_val_stmt, $.blob_update_key_stmt, $.blob_update_val_stmt, $.call_stmt, $.close_stmt, $.commit_return_stmt, $.commit_trans_stmt, $.const_stmt, $.continue_stmt, $.create_index_stmt, $.create_proc_stmt, $.create_table_stmt, $.create_trigger_stmt, $.create_view_stmt, $.create_virtual_table_stmt, $.declare_deployable_region_stmt, $.declare_enum_stmt, $.declare_const_stmt, $.declare_group_stmt, $.declare_func_stmt, $.declare_select_func_stmt, $.declare_out_call_stmt, $.declare_proc_no_check_stmt, $.declare_proc_stmt, $.declare_interface_stmt, $.declare_schema_region_stmt, $.declare_vars_stmt, $.declare_forward_read_cursor_stmt, $.declare_fetched_value_cursor_stmt, $.declare_type_stmt, $.delete_stmt, $.drop_index_stmt, $.drop_table_stmt, $.drop_trigger_stmt, $.drop_view_stmt, $.echo_stmt, $.emit_enums_stmt, $.emit_group_stmt, $.emit_constants_stmt, $.end_schema_region_stmt, $.enforce_normal_stmt, $.enforce_pop_stmt, $.enforce_push_stmt, $.enforce_reset_stmt, $.enforce_strict_stmt, $.explain_stmt, $.select_nothing_stmt, $.fetch_call_stmt, $.fetch_stmt, $.fetch_values_stmt, $.fetch_cursor_from_blob_stmt, $.guard_stmt, $.if_stmt, $.insert_stmt, $.leave_stmt, $.let_stmt, $.loop_stmt, $.macro_def_stmt, $.op_stmt, $.out_stmt, $.out_union_stmt, $.out_union_parent_child_stmt, $.previous_schema_stmt, $.proc_savepoint_stmt, $.release_savepoint_stmt, $.return_stmt, $.rollback_return_stmt, $.rollback_trans_stmt, $.savepoint_stmt, $.select_stmt, $.schema_ad_hoc_migration_stmt, $.schema_unsub_stmt, $.schema_upgrade_script_stmt, $.schema_upgrade_version_stmt, $.set_stmt, $.switch_stmt, $.throw_stmt, $.trycatch_stmt, $.update_cursor_stmt, $.update_stmt, $.upsert_stmt, $.while_stmt, $.with_delete_stmt, $.with_insert_stmt, $.with_update_stmt, $.with_upsert_stmt, $.keep_table_name_in_aliases_stmt),
@@ -640,7 +643,8 @@ module.exports = grammar({
     BLOB_LIT: $ => /[xX]'([0-9a-fA-F][0-9a-fA-F])*'/,
     C_STR_LIT: $ => /\"(\\.|[^"\n])*\"/,
     STR_LIT: $ => /'(\\.|''|[^'\n])*'/,
-    ID: $ => /[_A-Za-z][A-Za-z0-9_]*/
+    ID: $ => /[_A-Za-z][A-Za-z0-9_]*/,
+    ID_BANG: $ => /[_A-Za-z][A-Za-z0-9_]*[!]/
   }
 });
 
