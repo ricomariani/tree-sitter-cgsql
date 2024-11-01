@@ -5,7 +5,7 @@
       "camelcase": "CGSQL",
       "scope": "source.cgsql",
       "path": ".",
-      "file-types": null,
+      "file-types": "cgsql",
       "injection-regex": "^cgsql$"
     }
   ],
