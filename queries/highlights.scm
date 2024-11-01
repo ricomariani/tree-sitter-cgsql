@@ -196,3 +196,4 @@
 (AT_ECHO) @macro
 (AT_TEXT) @macro
 (AT_OP) @macro
+(AT_MACRO) @macro

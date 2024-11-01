@@ -5,7 +5,8 @@
       "camelcase": "CGSQL",
       "scope": "source.cgsql",
       "path": ".",
-      "file-types": ["cgsql", "sql", "cql"]
+      "file-types": ["cgsql", "sql", "cql"],
+      "highlights": "./queries/highlights.scm"
     }
   ],
   "metadata": {
