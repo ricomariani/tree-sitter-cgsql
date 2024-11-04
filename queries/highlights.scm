@@ -197,3 +197,7 @@
 (AT_TEXT) @macro
 (AT_OP) @macro
 (AT_MACRO) @macro
+(AT_IFDEF) @macro
+(AT_IFNDEF) @macro
+(AT_ELSE) @macro
+(AT_ENDIF) @macro
