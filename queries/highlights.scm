@@ -6,7 +6,6 @@
 (C_STR_LIT) @string
 (STR_LIT) @string
 (BLOB_LIT) @constant
-(ID_BANG) @macro
 (data_type_any) @type
 (AT_SENSITIVE) @type
 (LET) @keyword
