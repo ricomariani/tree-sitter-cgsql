@@ -253,13 +253,36 @@ module.exports = grammar({
       seq($.DROP, $.TRIGGER, $.IF, $.EXISTS, $.sql_name),
       seq($.DROP, $.TRIGGER, $.sql_name)),
 
-    create_virtual_table_stmt: $ => seq($.CREATE, $.VIRTUAL, $.TABLE, optional($.opt_vtab_flags), $.sql_name, $.USING, $.name, optional($.opt_module_args), $.AS, '(', $.col_key_list, ')', optional($.opt_delete_version_attr)),
+    create_virtual_table_stmt: $ => seq(
+          $.CREATE,
+          $.VIRTUAL,
+          $.TABLE,
+          optional($.opt_vtab_flags),
+          $.sql_name,
+          $.USING,
+          $.name,
+          optional($.opt_module_args),
+          $.AS,
+          '(',
+          $.col_key_list,
+          ')',
+          optional($.opt_delete_version_attr)),
 
     opt_module_args: $ => choice(
       seq('(', $.misc_attr_value_list, ')'),
       seq('(', $.ARGUMENTS, $.FOLLOWING, ')')),
 
-    create_table_stmt: $ => seq($.CREATE, optional($.opt_temp), $.TABLE, optional($.opt_if_not_exists), $.sql_name, '(', $.col_key_list, ')', optional($.opt_no_rowid), optional($.version_attrs_opt_recreate)),
+    create_table_stmt: $ => seq(
+          $.CREATE,
+          optional($.opt_temp),
+          $.TABLE,
+          optional($.opt_if_not_exists),
+          $.sql_name,
+          '(',
+          $.col_key_list,
+          ')',
+          optional($.opt_no_rowid),
+          optional($.version_attrs_opt_recreate)),
 
     opt_temp: $ => $.TEMP,
 
@@ -340,7 +363,15 @@ module.exports = grammar({
     col_def: $ => seq(optional($.misc_attrs), $.sql_name, $.data_type_any, optional($.col_attrs)),
 
     pk_def: $ => choice(
-      seq($.CONSTRAINT, $.sql_name, $.PRIMARY, $.KEY, '(', $.indexed_columns, ')', optional($.conflict_clause)),
+      seq(
+          $.CONSTRAINT,
+          $.sql_name,
+          $.PRIMARY,
+          $.KEY,
+          '(',
+          $.indexed_columns,
+          ')',
+          optional($.conflict_clause)),
       seq($.PRIMARY, $.KEY, '(', $.indexed_columns, ')', optional($.conflict_clause))),
 
     ON_CONFLICT: $ => prec.left(1, seq(CI('on'), CI('conflict'))),
@@ -398,7 +429,19 @@ module.exports = grammar({
       $.indexed_column,
       seq($.indexed_column, ',', $.indexed_columns)),
 
-    create_index_stmt: $ => seq($.CREATE, optional($.opt_unique), $.INDEX, optional($.opt_if_not_exists), $.sql_name, $.ON, $.sql_name, '(', $.indexed_columns, ')', optional($.opt_where), optional($.opt_delete_version_attr)),
+    create_index_stmt: $ => seq(
+          $.CREATE,
+          optional($.opt_unique),
+          $.INDEX,
+          optional($.opt_if_not_exists),
+          $.sql_name,
+          $.ON,
+          $.sql_name,
+          '(',
+          $.indexed_columns,
+          ')',
+          optional($.opt_where),
+          optional($.opt_delete_version_attr)),
 
     name: $ => choice(
       $.ID,
@@ -564,7 +607,13 @@ module.exports = grammar({
       seq($.RAISE, '(', $.FAIL, ',', $.expr, ')')),
 
     simple_call: $ => choice(
-      seq($.loose_name, '(', optional($.DISTINCT), optional($.arg_list), ')', optional($.opt_filter_clause)),
+      seq(
+          $.loose_name,
+          '(',
+          optional($.DISTINCT),
+          optional($.arg_list),
+          ')',
+          optional($.opt_filter_clause)),
       seq($.GLOB, '(', optional($.DISTINCT), optional($.arg_list), ')', optional($.opt_filter_clause)),
       seq($.LIKE, '(', optional($.DISTINCT), optional($.arg_list), ')', optional($.opt_filter_clause))),
 
@@ -777,7 +826,15 @@ module.exports = grammar({
       seq('(', optional($.insert_list), ')', ',', $.values)),
 
     select_core: $ => choice(
-      seq($.SELECT, optional($.select_opts), $.select_expr_list, optional($.opt_from_query_parts), optional($.opt_where), optional($.opt_groupby), optional($.opt_having), optional($.opt_select_window)),
+      seq(
+          $.SELECT,
+          optional($.select_opts),
+          $.select_expr_list,
+          optional($.opt_from_query_parts),
+          optional($.opt_where),
+          optional($.opt_groupby),
+          optional($.opt_having),
+          optional($.opt_select_window)),
       seq($.VALUES, $.values)),
 
     UNION_ALL: $ => prec.left(1, seq(CI('union'), CI('all'))),
@@ -978,8 +1035,27 @@ module.exports = grammar({
     table_function: $ => seq($.name, '(', optional($.arg_list), ')'),
 
     create_view_stmt: $ => choice(
-      seq($.CREATE, optional($.opt_temp), $.VIEW, optional($.opt_if_not_exists), $.sql_name, $.AS, $.select_stmt, optional($.opt_delete_version_attr)),
-      seq($.CREATE, optional($.opt_temp), $.VIEW, optional($.opt_if_not_exists), $.sql_name, '(', $.name_list, ')', $.AS, $.select_stmt, optional($.opt_delete_version_attr))),
+      seq(
+          $.CREATE,
+          optional($.opt_temp),
+          $.VIEW,
+          optional($.opt_if_not_exists),
+          $.sql_name,
+          $.AS,
+          $.select_stmt,
+          optional($.opt_delete_version_attr)),
+      seq(
+          $.CREATE,
+          optional($.opt_temp),
+          $.VIEW,
+          optional($.opt_if_not_exists),
+          $.sql_name,
+          '(',
+          $.name_list,
+          ')',
+          $.AS,
+          $.select_stmt,
+          optional($.opt_delete_version_attr))),
 
     with_delete_stmt: $ => seq($.with_prefix, $.delete_stmt),
 
@@ -1018,8 +1094,18 @@ module.exports = grammar({
       seq($.FROM, $.ARGUMENTS, optional($.opt_column_spec))),
 
     insert_stmt: $ => choice(
-      seq($.insert_stmt_type, $.sql_name, optional($.opt_column_spec), $.select_stmt, optional($.opt_insert_dummy_spec)),
-      seq($.insert_stmt_type, $.sql_name, optional($.opt_column_spec), $.from_shape, optional($.opt_insert_dummy_spec)),
+      seq(
+          $.insert_stmt_type,
+          $.sql_name,
+          optional($.opt_column_spec),
+          $.select_stmt,
+          optional($.opt_insert_dummy_spec)),
+      seq(
+          $.insert_stmt_type,
+          $.sql_name,
+          optional($.opt_column_spec),
+          $.from_shape,
+          optional($.opt_insert_dummy_spec)),
       seq($.insert_stmt_type, $.sql_name, $.DEFAULT, $.VALUES),
       seq($.insert_stmt_type, $.sql_name, $.USING, $.select_stmt),
       seq($.insert_stmt_type, $.sql_name, $.USING, $.expr_names, optional($.opt_insert_dummy_spec))),
@@ -1032,13 +1118,39 @@ module.exports = grammar({
       $.insert_list_item,
       seq($.insert_list_item, ',', optional($.insert_list))),
 
-    basic_update_stmt: $ => seq($.UPDATE, optional($.sql_name), $.SET, $.update_list, optional($.opt_from_query_parts), optional($.opt_where)),
+    basic_update_stmt: $ => seq(
+          $.UPDATE,
+          optional($.sql_name),
+          $.SET,
+          $.update_list,
+          optional($.opt_from_query_parts),
+          optional($.opt_where)),
 
     with_update_stmt: $ => seq($.with_prefix, $.update_stmt),
 
     update_stmt: $ => choice(
-      seq($.UPDATE, $.sql_name, $.SET, $.update_list, optional($.opt_from_query_parts), optional($.opt_where), optional($.opt_orderby), optional($.opt_limit)),
-      seq($.UPDATE, $.sql_name, $.SET, $.column_spec, '=', '(', optional($.insert_list), ')', optional($.opt_from_query_parts), optional($.opt_where), optional($.opt_orderby), optional($.opt_limit))),
+      seq(
+          $.UPDATE,
+          $.sql_name,
+          $.SET,
+          $.update_list,
+          optional($.opt_from_query_parts),
+          optional($.opt_where),
+          optional($.opt_orderby),
+          optional($.opt_limit)),
+      seq(
+          $.UPDATE,
+          $.sql_name,
+          $.SET,
+          $.column_spec,
+          '=',
+          '(',
+          optional($.insert_list),
+          ')',
+          optional($.opt_from_query_parts),
+          optional($.opt_where),
+          optional($.opt_orderby),
+          optional($.opt_limit))),
 
     update_entry: $ => seq($.sql_name, '=', $.expr),
 
@@ -1053,7 +1165,16 @@ module.exports = grammar({
       seq($.insert_stmt, $.ON_CONFLICT, optional($.conflict_target), $.DO, $.basic_update_stmt)),
 
     update_cursor_stmt: $ => choice(
-      seq($.UPDATE, $.CURSOR, $.name, optional($.opt_column_spec), $.FROM, $.VALUES, '(', optional($.insert_list), ')'),
+      seq(
+          $.UPDATE,
+          $.CURSOR,
+          $.name,
+          optional($.opt_column_spec),
+          $.FROM,
+          $.VALUES,
+          '(',
+          optional($.insert_list),
+          ')'),
       seq($.UPDATE, $.CURSOR, $.name, optional($.opt_column_spec), $.from_shape),
       seq($.UPDATE, $.CURSOR, $.name, $.USING, $.expr_names)),
 
@@ -1096,8 +1217,23 @@ module.exports = grammar({
       seq($.DECLARE, $.SELECT, $.function, $.name, $.NO, $.CHECK, '(', $.typed_names, ')')),
 
     declare_func_stmt: $ => choice(
-      seq($.DECLARE, $.function, $.loose_name, '(', optional($.func_params), ')', $.data_type_with_options),
-      seq($.DECLARE, $.function, $.loose_name, '(', optional($.func_params), ')', $.CREATE, $.data_type_with_options),
+      seq(
+          $.DECLARE,
+          $.function,
+          $.loose_name,
+          '(',
+          optional($.func_params),
+          ')',
+          $.data_type_with_options),
+      seq(
+          $.DECLARE,
+          $.function,
+          $.loose_name,
+          '(',
+          optional($.func_params),
+          ')',
+          $.CREATE,
+          $.data_type_with_options),
       seq($.DECLARE, $.function, $.loose_name, $.NO, $.CHECK, $.data_type_with_options),
       seq($.DECLARE, $.function, $.loose_name, $.NO, $.CHECK, $.CREATE, $.data_type_with_options)),
 
@@ -1111,17 +1247,72 @@ module.exports = grammar({
       seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')'),
       seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', '(', $.typed_names, ')'),
       seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.USING, $.TRANSACTION),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.OUT, '(', $.typed_names, ')'),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.OUT, '(', $.typed_names, ')', $.USING, $.TRANSACTION),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.OUT, $.UNION, '(', $.typed_names, ')'),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.OUT, $.UNION, '(', $.typed_names, ')', $.USING, $.TRANSACTION)),
+      seq(
+          $.DECLARE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.params),
+          ')',
+          $.OUT,
+          '(',
+          $.typed_names,
+          ')'),
+      seq(
+          $.DECLARE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.params),
+          ')',
+          $.OUT,
+          '(',
+          $.typed_names,
+          ')',
+          $.USING,
+          $.TRANSACTION),
+      seq(
+          $.DECLARE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.params),
+          ')',
+          $.OUT,
+          $.UNION,
+          '(',
+          $.typed_names,
+          ')'),
+      seq(
+          $.DECLARE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.params),
+          ')',
+          $.OUT,
+          $.UNION,
+          '(',
+          $.typed_names,
+          ')',
+          $.USING,
+          $.TRANSACTION)),
 
     declare_interface_stmt: $ => choice(
       seq($.DECLARE, $.INTERFACE, $.name, '(', $.typed_names, ')'),
       seq($.INTERFACE, $.name, '(', $.typed_names, ')')),
 
     create_proc_stmt: $ => choice(
-      seq($.CREATE, $.procedure, $.loose_name, '(', optional($.params), ')', $.BEGIN, optional($.stmt_list), $.END),
+      seq(
+          $.CREATE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.params),
+          ')',
+          $.BEGIN,
+          optional($.stmt_list),
+          $.END),
       seq($.procedure, $.loose_name, '(', optional($.params), ')', $.BEGIN, optional($.stmt_list), $.END)),
 
     inout: $ => choice(
@@ -1217,7 +1408,18 @@ module.exports = grammar({
     throw_stmt: $ => $.THROW,
 
     trycatch_stmt: $ => choice(
-      seq($.BEGIN, $.TRY, optional($.stmt_list), $.END, $.TRY, ';', $.BEGIN, $.CATCH, optional($.stmt_list), $.END, $.CATCH),
+      seq(
+          $.BEGIN,
+          $.TRY,
+          optional($.stmt_list),
+          $.END,
+          $.TRY,
+          ';',
+          $.BEGIN,
+          $.CATCH,
+          optional($.stmt_list),
+          $.END,
+          $.CATCH),
       seq($.TRY, optional($.stmt_list), $.CATCH, optional($.stmt_list), $.END)),
 
     continue_stmt: $ => $.CONTINUE,
@@ -1231,7 +1433,16 @@ module.exports = grammar({
     fetch_cursor_from_blob_stmt: $ => seq($.FETCH, $.name, $.FROM_BLOB, $.expr),
 
     fetch_values_stmt: $ => choice(
-      seq($.FETCH, $.name, optional($.opt_column_spec), $.FROM, $.VALUES, '(', optional($.insert_list), ')', optional($.opt_insert_dummy_spec)),
+      seq(
+          $.FETCH,
+          $.name,
+          optional($.opt_column_spec),
+          $.FROM,
+          $.VALUES,
+          '(',
+          optional($.insert_list),
+          ')',
+          optional($.opt_insert_dummy_spec)),
       seq($.FETCH, $.name, optional($.opt_column_spec), $.from_shape, optional($.opt_insert_dummy_spec)),
       seq($.FETCH, $.name, $.USING, $.expr_names, optional($.opt_insert_dummy_spec))),
 
@@ -1316,9 +1527,21 @@ module.exports = grammar({
 
     alter_table_add_column_stmt: $ => seq($.ALTER, $.TABLE, $.sql_name, $.ADD, $.COLUMN, $.col_def),
 
-    create_trigger_stmt: $ => seq($.CREATE, optional($.opt_temp), $.TRIGGER, optional($.opt_if_not_exists), $.trigger_def, optional($.opt_delete_version_attr)),
+    create_trigger_stmt: $ => seq(
+          $.CREATE,
+          optional($.opt_temp),
+          $.TRIGGER,
+          optional($.opt_if_not_exists),
+          $.trigger_def,
+          optional($.opt_delete_version_attr)),
 
-    trigger_def: $ => seq($.sql_name, optional($.trigger_condition), $.trigger_operation, $.ON, $.sql_name, $.trigger_action),
+    trigger_def: $ => seq(
+          $.sql_name,
+          optional($.trigger_condition),
+          $.trigger_operation,
+          $.ON,
+          $.sql_name,
+          $.trigger_action),
 
     trigger_condition: $ => choice(
       $.BEFORE,
