@@ -20,6 +20,7 @@ module.exports = grammar({
   ],
   word: $ => $.ID,
   rules: {
+
     program: $ => optional($.stmt_list),
 
     INT_LIT: $ => choice(/[0-9]+/, /0x[0-9a-fA-F]+/),
@@ -82,9 +83,6 @@ module.exports = grammar({
         optional(repeat1($.elseif_item)),
         optional($.opt_else),
         $.END, optional($.IF)),
-    cte_tables_macro_ref: $ => choice(
-      seq($.ID, '!'),
-      seq(seq($.ID, '!'), '(', optional($.macro_args), ')')),
 
     stmt: $ => seq(optional($.misc_attrs), $.any_stmt, ';'),
 
@@ -1915,7 +1913,7 @@ module.exports = grammar({
 
     AT_OP: $ => CI('@op'),
 
-    /* This has to go last so that it is less favorable than keywords */
+/* This has to go last so that it is less favorable than keywords */
     ID: $ => /[_A-Za-z][A-Za-z0-9_]*/,
   }
 });
