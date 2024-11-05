@@ -48,12 +48,12 @@ module.exports = grammar({
       $.query_parts_macro_ref),
 
     expr_macro_ref: $ => prec.left(1,choice(
-      seq($.ID, '!'),
-      seq($.ID, '!', '(', optional($.macro_args), ')'),
-      seq($.basic_expr, ':', $.ID, '!', '(', optional($.macro_args), ')'),
-      seq($.basic_expr, ':', $.ID, '!'))),
+      seq($.name, '!'),
+      seq($.name, '!', '(', optional($.macro_args), ')'),
+      seq($.basic_expr, ':', $.name, '!', '(', optional($.macro_args), ')'),
+      seq($.basic_expr, ':', $.name, '!'))),
 
-    macro_ref: $ => choice(seq($.ID, '!'), seq($.ID, '!', '(', optional($.macro_args), ')')),
+    macro_ref: $ => choice(seq($.name, '!'), seq($.name, '!', '(', optional($.macro_args), ')')),
 
     query_parts_macro_ref: $ => prec(1, $.macro_ref),
     cte_tables_macro_ref: $ => prec(2, $.macro_ref),
@@ -1421,17 +1421,17 @@ module.exports = grammar({
 
     keep_table_name_in_aliases_stmt: $ => $.AT_KEEP_TABLE_NAME_IN_ALIASES,
 
-    expr_macro_def: $ => seq($.AT_MACRO, '(', $.EXPR, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    expr_macro_def: $ => seq($.AT_MACRO, '(', $.EXPR, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
-    stmt_list_macro_def: $ => seq($.AT_MACRO, '(', $.STMT_LIST, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    stmt_list_macro_def: $ => seq($.AT_MACRO, '(', $.STMT_LIST, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
-    query_parts_macro_def: $ => seq($.AT_MACRO, '(', $.QUERY_PARTS, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    query_parts_macro_def: $ => seq($.AT_MACRO, '(', $.QUERY_PARTS, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
-    cte_tables_macro_def: $ => seq($.AT_MACRO, '(', $.CTE_TABLES, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    cte_tables_macro_def: $ => seq($.AT_MACRO, '(', $.CTE_TABLES, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
-    select_core_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_CORE, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    select_core_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_CORE, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
-    select_expr_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_EXPR, ')', $.ID, '!', '(', optional($.macro_formals), ')'),
+    select_expr_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_EXPR, ')', $.name, '!', '(', optional($.macro_formals), ')'),
 
     op_stmt: $ => choice(
       seq($.AT_OP, $.data_type_any, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name),
@@ -1467,7 +1467,7 @@ module.exports = grammar({
       $.macro_formal,
       seq($.macro_formal, ',', $.macro_formals)),
 
-    macro_formal: $ => seq($.ID, '!', $.macro_type),
+    macro_formal: $ => seq($.name, '!', $.macro_type),
 
     macro_type: $ => choice(
       $.EXPR,
