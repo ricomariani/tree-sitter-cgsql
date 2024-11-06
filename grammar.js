@@ -6,9 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const PREC = {
-};
-
 module.exports = grammar({
   name: 'cql',
   extras: $ => [
@@ -28,7 +25,7 @@ module.exports = grammar({
     REAL_LIT: $ => /([0-9]+\.[0-9]*|\.[0-9]+)((E|e)(\+|\-)?[0-9]+)?/,
     BLOB_LIT: $ => /[xX]'([0-9a-fA-F][0-9a-fA-F])*'/,
     C_STR_LIT: $ => /"(\\.|[^"\n])*"/,
-    STR_LIT: $ => /'(\\.|''|[^'])*'/,
+    STR_LIT: $ => /'(''|[^'])*'/,
     QID: $ => /`(``|[^`\n])*`/,
 
     /* no newline between ELSE and IF */
