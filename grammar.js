@@ -188,8 +188,6 @@ module.exports = grammar({
 
     explain_stmt: $ => seq($.EXPLAIN, optional($.opt_query_plan), $.explain_target),
 
-    QUERY_PLAN: $ => prec.left(1, seq(CI('query'), CI('plan'))),
-
     opt_query_plan: $ => $.QUERY_PLAN,
 
     explain_target: $ => choice(
@@ -374,8 +372,6 @@ module.exports = grammar({
           optional($.conflict_clause)),
       seq($.PRIMARY, $.KEY, '(', $.indexed_columns, ')', optional($.conflict_clause))),
 
-    ON_CONFLICT: $ => prec.left(1, seq(CI('on'), CI('conflict'))),
-
     conflict_clause: $ => choice(
       seq($.ON_CONFLICT, $.ROLLBACK),
       seq($.ON_CONFLICT, $.ABORT),
@@ -400,8 +396,6 @@ module.exports = grammar({
       $.CASCADE,
       $.RESTRICT,
       seq($.NO, $.ACTION)),
-
-    NOT_DEFERRABLE: $ => prec.left(1, seq(CI('not'), CI('deferrable'))),
 
     fk_deferred_options: $ => choice(
       seq($.DEFERRABLE, optional($.fk_initial_state)),
@@ -656,28 +650,6 @@ module.exports = grammar({
       seq($.basic_expr, "->", $.basic_expr),
       seq($.basic_expr, "->>", '~', $.data_type_any, '~', $.basic_expr))),
 
-    IS_NOT_TRUE: $ => prec.left(1, seq(CI('is'), CI('not'), CI('true'))),
-
-    IS_NOT_FALSE: $ => prec.left(1, seq(CI('is'), CI('not'), CI('false'))),
-
-    IS_TRUE: $ => prec.left(1, seq(CI('is'), CI('true'))),
-
-    IS_FALSE: $ => prec.left(1, seq(CI('is'), CI('false'))),
-
-    NOT_IN: $ => prec.left(1, seq(CI('not'), CI('in'))),
-
-    NOT_LIKE: $ => prec.left(1, seq(CI('not'), CI('like'))),
-
-    NOT_MATCH: $ => prec.left(1, seq(CI('not'), CI('match'))),
-
-    NOT_REGEXP: $ => prec.left(1, seq(CI('not'), CI('regexp'))),
-
-    NOT_GLOB: $ => prec.left(1, seq(CI('not'), CI('glob'))),
-
-    NOT_BETWEEN: $ => prec.left(1, seq(CI('not'), CI('between'))),
-
-    IS_NOT: $ => prec.left(1, seq(CI('is'), CI('not'))),
-
     math_expr: $ => prec.left(1, choice(
       $.basic_expr,
       seq($.math_expr, '&', $.math_expr),
@@ -837,8 +809,6 @@ module.exports = grammar({
           optional($.opt_select_window)),
       seq($.VALUES, $.values)),
 
-    UNION_ALL: $ => prec.left(1, seq(CI('union'), CI('all'))),
-
     compound_operator: $ => choice(
       $.UNION,
       $.UNION_ALL,
@@ -862,14 +832,6 @@ module.exports = grammar({
       $.ROWS,
       $.GROUPS),
 
-    EXCLUDE_NO_OTHERS: $ => prec.left(1, seq(CI('exclude'), CI('no'), CI('others'))),
-
-    EXCLUDE_CURRENT_ROW: $ => prec.left(1, seq(CI('exclude'), CI('current'), CI('row'))),
-
-    EXCLUDE_GROUP: $ => prec.left(1, seq(CI('exclude'), CI('group'))),
-
-    EXCLUDE_TIES: $ => prec.left(1, seq(CI('exclude'), CI('ties'))),
-
     frame_exclude: $ => choice(
       $.EXCLUDE_NO_OTHERS,
       $.EXCLUDE_CURRENT_ROW,
@@ -879,8 +841,6 @@ module.exports = grammar({
     frame_boundary_opts: $ => choice(
       $.frame_boundary,
       seq($.BETWEEN, $.frame_boundary_start, $.AND, $.frame_boundary_end)),
-
-    CURRENT_ROW: $ => prec.left(1, seq(CI('current'), CI('row'))),
 
     frame_boundary_start: $ => choice(
       seq($.UNBOUNDED, $.PRECEDING),
@@ -1428,8 +1388,6 @@ module.exports = grammar({
       seq($.FETCH, $.name, $.INTO, $.name_list),
       seq($.FETCH, $.name)),
 
-    FROM_BLOB: $ => prec.left(1, seq(CI('from'), CI('blob'))),
-
     fetch_cursor_from_blob_stmt: $ => seq($.FETCH, $.name, $.FROM_BLOB, $.expr),
 
     fetch_values_stmt: $ => choice(
@@ -1557,8 +1515,6 @@ module.exports = grammar({
 
     trigger_action: $ => seq(optional($.opt_foreachrow), optional($.opt_when_expr), $.BEGIN, $.trigger_stmts, $.END),
 
-    FOR_EACH_ROW: $ => prec.left(1, seq(CI('for'), CI('each'), CI('row'))),
-
     opt_foreachrow: $ => $.FOR_EACH_ROW,
 
     opt_when_expr: $ => seq($.WHEN, $.expr),
@@ -1580,14 +1536,6 @@ module.exports = grammar({
     trigger_delete_stmt: $ => $.delete_stmt,
 
     trigger_update_stmt: $ => $.basic_update_stmt,
-
-    CONTEXT_COLUMN: $ => prec.left(1, seq(CI('context'), CI('column'))),
-
-    CONTEXT_TYPE: $ => prec.left(1, seq(CI('context'), CI('type'))),
-
-    SIGN_FUNCTION: $ => prec.left(1, seq(CI('sign'), CI('function'))),
-
-    CURSOR_HAS_ROW: $ => prec.left(1, seq(CI('cursor'), CI('has'), CI('row'))),
 
     enforcement_options: $ => choice(
       seq($.FOREIGN, $.KEY, $.ON, $.UPDATE),
@@ -1702,6 +1650,8 @@ module.exports = grammar({
 
     EXPLAIN: $ => CI('explain'),
 
+    QUERY_PLAN: $ => prec.left(1, seq(CI('query'), CI('plan'))),
+
     AT_PREVIOUS_SCHEMA: $ => CI('@previous_schema'),
 
     AT_SCHEMA_UPGRADE_SCRIPT: $ => CI('@schema_upgrade_script'),
@@ -1772,6 +1722,8 @@ module.exports = grammar({
 
     KEY: $ => CI('key'),
 
+    ON_CONFLICT: $ => prec.left(1, seq(CI('on'), CI('conflict'))),
+
     ROLLBACK: $ => CI('rollback'),
 
     ABORT: $ => CI('abort'),
@@ -1801,6 +1753,8 @@ module.exports = grammar({
     ACTION: $ => CI('action'),
 
     DEFERRABLE: $ => CI('deferrable'),
+
+    NOT_DEFERRABLE: $ => prec.left(1, seq(CI('not'), CI('deferrable'))),
 
     INITIALLY: $ => CI('initially'),
 
@@ -1922,19 +1876,41 @@ module.exports = grammar({
 
     TYPE_CHECK: $ => CI('type_check'),
 
+    IS_NOT_TRUE: $ => prec.left(1, seq(CI('is'), CI('not'), CI('true'))),
+
+    IS_NOT_FALSE: $ => prec.left(1, seq(CI('is'), CI('not'), CI('false'))),
+
     ISNULL: $ => CI('isnull'),
 
     NOTNULL: $ => CI('notnull'),
 
+    IS_TRUE: $ => prec.left(1, seq(CI('is'), CI('true'))),
+
+    IS_FALSE: $ => prec.left(1, seq(CI('is'), CI('false'))),
+
+    NOT_IN: $ => prec.left(1, seq(CI('not'), CI('in'))),
+
     IN: $ => CI('in'),
+
+    NOT_LIKE: $ => prec.left(1, seq(CI('not'), CI('like'))),
 
     MATCH: $ => CI('match'),
 
+    NOT_MATCH: $ => prec.left(1, seq(CI('not'), CI('match'))),
+
     REGEXP: $ => CI('regexp'),
+
+    NOT_REGEXP: $ => prec.left(1, seq(CI('not'), CI('regexp'))),
+
+    NOT_GLOB: $ => prec.left(1, seq(CI('not'), CI('glob'))),
 
     BETWEEN: $ => CI('between'),
 
     AND: $ => CI('and'),
+
+    NOT_BETWEEN: $ => prec.left(1, seq(CI('not'), CI('between'))),
+
+    IS_NOT: $ => prec.left(1, seq(CI('is'), CI('not'))),
 
     IS: $ => CI('is'),
 
@@ -1952,6 +1928,8 @@ module.exports = grammar({
 
     UNION: $ => CI('union'),
 
+    UNION_ALL: $ => prec.left(1, seq(CI('union'), CI('all'))),
+
     INTERSECT: $ => CI('intersect'),
 
     EXCEPT: $ => CI('except'),
@@ -1966,9 +1944,19 @@ module.exports = grammar({
 
     GROUPS: $ => CI('groups'),
 
+    EXCLUDE_NO_OTHERS: $ => prec.left(1, seq(CI('exclude'), CI('no'), CI('others'))),
+
+    EXCLUDE_CURRENT_ROW: $ => prec.left(1, seq(CI('exclude'), CI('current'), CI('row'))),
+
+    EXCLUDE_GROUP: $ => prec.left(1, seq(CI('exclude'), CI('group'))),
+
+    EXCLUDE_TIES: $ => prec.left(1, seq(CI('exclude'), CI('ties'))),
+
     UNBOUNDED: $ => CI('unbounded'),
 
     PRECEDING: $ => CI('preceding'),
+
+    CURRENT_ROW: $ => prec.left(1, seq(CI('current'), CI('row'))),
 
     PARTITION: $ => CI('partition'),
 
@@ -2080,6 +2068,8 @@ module.exports = grammar({
 
     CONTINUE: $ => CI('continue'),
 
+    FROM_BLOB: $ => prec.left(1, seq(CI('from'), CI('blob'))),
+
     CLOSE: $ => CI('close'),
 
     EXCLUSIVE: $ => CI('exclusive'),
@@ -2098,11 +2088,21 @@ module.exports = grammar({
 
     OF: $ => CI('of'),
 
+    FOR_EACH_ROW: $ => prec.left(1, seq(CI('for'), CI('each'), CI('row'))),
+
     UPSERT: $ => CI('upsert'),
 
     STATEMENT: $ => CI('statement'),
 
     ENCODE: $ => CI('encode'),
+
+    CONTEXT_COLUMN: $ => prec.left(1, seq(CI('context'), CI('column'))),
+
+    CONTEXT_TYPE: $ => prec.left(1, seq(CI('context'), CI('type'))),
+
+    SIGN_FUNCTION: $ => prec.left(1, seq(CI('sign'), CI('function'))),
+
+    CURSOR_HAS_ROW: $ => prec.left(1, seq(CI('cursor'), CI('has'), CI('row'))),
 
     AT_ENFORCE_STRICT: $ => CI('@enforce_strict'),
 
