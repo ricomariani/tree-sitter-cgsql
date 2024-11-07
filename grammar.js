@@ -58,30 +58,12 @@ module.exports = grammar({
     select_expr_macro_ref: $ => prec(4, $.macro_ref),
     stmt_list_macro_ref: $ => prec(5, $.macro_ref),
 
-    AT_IFDEF: $ => CI('@ifdef'),
-    AT_IFNDEF: $ => CI('@ifndef'),
-    AT_ELSE: $ => CI('@else'),
-    AT_ENDIF: $ => CI('@endif'),
+    stmt_list: $ => repeat1(choice($.stmt, $.include_stmt, $.comment)),
 
-    ifdef: $ => seq($.AT_IFDEF, $.ID, $.stmt_list, optional(seq($.AT_ELSE, $.stmt_list)), $.AT_ENDIF),
-    ifndef: $ => seq($.AT_IFNDEF, $.ID, $.stmt_list, optional(seq($.AT_ELSE, $.stmt_list)), $.AT_ENDIF),
-
-    pre_proc: $ => choice($.ifdef, $.ifndef),
-
-    stmt_list: $ => repeat1(choice($.stmt, $.include_stmt, $.pre_proc, $.comment)),
-
-    /* Manually define the if_stmt rule because if not we're going to have parsing
-     * issues with "opt_elseif_list" and "opt_else" rule. Providing a priority
-     * doesn't suffice to resolve the conflict.
-     */
-
-    if_stmt: $ => seq($.IF, $.expr, $.THEN,
-        optional($.stmt_list),
-        optional(repeat1($.elseif_item)),
-        optional($.opt_else),
-        $.END, optional($.IF)),
-
-    stmt: $ => seq(optional($.misc_attrs), $.any_stmt, ';'),
+    stmt: $ => choice(
+      seq(optional($.misc_attrs), $.any_stmt, ';'),
+      $.ifdef_stmt,
+      $.ifndef_stmt),
 
     expr_stmt: $ => $.expr,
 
@@ -1425,6 +1407,15 @@ module.exports = grammar({
       seq($.call_stmt, $.USING, '(', $.name_list, ')'),
       seq($.call_stmt, $.USING, '(', $.name_list, ')', $.AS, $.name)),
 
+    if_stmt: $ => seq(
+          $.IF,
+          $.expr,
+          $.THEN,
+          optional($.stmt_list),
+          optional($.elseif_list),
+          optional($.opt_else),
+          $.END, optional($.IF)),
+
     opt_else: $ => seq($.ELSE, optional($.stmt_list)),
 
     elseif_item: $ => seq($.ELSE_IF, $.expr, $.THEN, optional($.stmt_list)),
@@ -1605,6 +1596,14 @@ module.exports = grammar({
       seq($.AT_OP, $.data_type_any, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name),
       seq($.AT_OP, $.CURSOR, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name),
       seq($.AT_OP, $.NULL, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name)),
+
+    ifdef_stmt: $ => choice(
+      seq($.AT_IFDEF, $.name, optional($.stmt_list), $.AT_ELSE, optional($.stmt_list), $.AT_ENDIF),
+      seq($.AT_IFDEF, $.name, optional($.stmt_list), $.AT_ENDIF)),
+
+    ifndef_stmt: $ => choice(
+      seq($.AT_IFNDEF, $.name, optional($.stmt_list), $.AT_ELSE, optional($.stmt_list), $.AT_ENDIF),
+      seq($.AT_IFNDEF, $.name, optional($.stmt_list), $.AT_ENDIF)),
 
     macro_def_stmt: $ => choice(
       seq($.expr_macro_def, $.BEGIN, $.expr, $.END),
@@ -2132,6 +2131,14 @@ module.exports = grammar({
     AT_MACRO: $ => CI('@macro'),
 
     AT_OP: $ => CI('@op'),
+
+    AT_IFDEF: $ => CI('@ifdef'),
+
+    AT_ELSE: $ => CI('@else'),
+
+    AT_ENDIF: $ => CI('@endif'),
+
+    AT_IFNDEF: $ => CI('@ifndef'),
 
 /* This has to go last so that it is less favorable than keywords */
     ID: $ => /[_A-Za-z][A-Za-z0-9_]*/,
