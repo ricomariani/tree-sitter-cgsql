@@ -37,28 +37,11 @@ module.exports = grammar({
        seq('--', /(\\(.|\r?\n)|[^\\\n])*/),
        seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/'))),
 
-    non_expr_macro_ref: $ => choice(
-      $.stmt_list_macro_ref,
-      $.cte_tables_macro_ref,
-      $.select_core_macro_ref,
-      $.select_expr_macro_ref,
-      $.query_parts_macro_ref),
-
-    expr_macro_ref: $ => prec.left(1,choice(
-      seq($.name, '!'),
-      seq($.name, '!', '(', optional($.macro_args), ')'),
-      seq($.basic_expr, ':', $.name, '!', '(', optional($.macro_args), ')'),
-      seq($.basic_expr, ':', $.name, '!'))),
-
-    macro_ref: $ => choice(seq($.name, '!'), seq($.name, '!', '(', optional($.macro_args), ')')),
-
-    query_parts_macro_ref: $ => prec(1, $.macro_ref),
-    cte_tables_macro_ref: $ => prec(2, $.macro_ref),
-    select_core_macro_ref: $ => prec(3, $.macro_ref),
-    select_expr_macro_ref: $ => prec(4, $.macro_ref),
-    stmt_list_macro_ref: $ => prec(5, $.macro_ref),
-
     stmt_list: $ => repeat1(choice($.stmt, $.include_stmt, $.comment)),
+
+    macro_ref: $ => choice(
+      seq($.ID, '!'),
+      seq($.ID, '!', '(', optional($.macro_args), ')')),
 
     stmt: $ => choice(
       seq(optional($.misc_attrs), $.any_stmt, ';'),
@@ -569,9 +552,7 @@ module.exports = grammar({
       $.text_arg,
       seq($.text_arg, ',', $.text_args)),
 
-    text_arg: $ => choice(
-      $.expr,
-      $.non_expr_macro_ref),
+    text_arg: $ => $.expr,
 
     raise_expr: $ => choice(
       seq($.RAISE, '(', $.IGNORE, ')'),
@@ -594,12 +575,14 @@ module.exports = grammar({
       $.simple_call,
       seq($.basic_expr, ':', $.simple_call),
       seq($.basic_expr, ':', $.loose_name),
-      seq($.basic_expr, ':', '(', optional($.arg_list), ')')),
+      seq($.basic_expr, ':', '(', optional($.arg_list), ')'),
+      seq($.basic_expr, ':', $.ID, '!'),
+      seq($.basic_expr, ':', $.ID, '!', '(', optional($.macro_args), ')')),
 
     basic_expr: $ => prec.left(1, choice(
       $.name,
       $.QID,
-      $.expr_macro_ref,
+      $.macro_ref,
       '*',
       $.AT_RC,
       seq($.basic_expr, '.', $.sql_name),
@@ -750,7 +733,7 @@ module.exports = grammar({
       seq('(', $.call_stmt, $.USING, $.cte_binding_list, ')'),
       seq($.cte_decl, $.LIKE, '(', $.select_stmt, ')'),
       seq($.cte_decl, $.LIKE, $.sql_name),
-      $.cte_tables_macro_ref),
+      $.macro_ref),
 
     with_prefix: $ => choice(
       seq($.WITH, $.cte_tables),
@@ -768,9 +751,7 @@ module.exports = grammar({
 
     select_core_list: $ => choice(
       $.select_core,
-      seq($.select_core, $.compound_operator, $.select_core_list),
-      $.select_core_macro_ref,
-      seq($.select_core_macro_ref, $.compound_operator, $.select_core_list)),
+      seq($.select_core, $.compound_operator, $.select_core_list)),
 
     values: $ => choice(
       seq('(', optional($.insert_list), ')'),
@@ -786,6 +767,7 @@ module.exports = grammar({
           optional($.opt_groupby),
           optional($.opt_having),
           optional($.opt_select_window)),
+      seq($.ROWS, '(', $.macro_ref, ')'),
       seq($.VALUES, $.values)),
 
     compound_operator: $ => choice(
@@ -923,9 +905,7 @@ module.exports = grammar({
 
     select_expr_list: $ => choice(
       $.select_expr,
-      seq($.select_expr, ',', $.select_expr_list),
-      $.select_expr_macro_ref,
-      seq($.select_expr_macro_ref, ',', $.select_expr_list)),
+      seq($.select_expr, ',', $.select_expr_list)),
 
     select_expr: $ => choice(
       seq($.expr, optional($.as_alias)),
@@ -955,7 +935,7 @@ module.exports = grammar({
       seq('(', $.shared_cte, ')', optional($.as_alias)),
       seq($.table_function, optional($.as_alias)),
       seq('(', $.query_parts, ')'),
-      seq($.query_parts_macro_ref, optional($.as_alias))),
+      seq($.macro_ref, optional($.as_alias))),
 
     join_type: $ => choice(
       $.LEFT,
@@ -1616,15 +1596,10 @@ module.exports = grammar({
     macro_arg: $ => choice(
       $.expr,
       seq($.BEGIN, $.stmt_list, $.END),
-      $.stmt_list_macro_ref,
       seq($.FROM, '(', $.query_parts, ')'),
-      $.query_parts_macro_ref,
       seq($.WITH, '(', $.cte_tables, ')'),
-      $.cte_tables_macro_ref,
-      seq($.ALL, '(', $.select_core_list, ')'),
-      $.select_core_macro_ref,
-      seq($.SELECT, '(', $.select_expr_list, ')'),
-      $.select_expr_macro_ref),
+      seq($.ROWS, '(', $.select_core_list, ')'),
+      seq($.SELECT, '(', $.select_expr_list, ')')),
 
     macro_args: $ => choice(
       $.macro_arg,
@@ -1920,6 +1895,8 @@ module.exports = grammar({
 
     SELECT: $ => CI('select'),
 
+    ROWS: $ => CI('rows'),
+
     VALUES: $ => CI('values'),
 
     UNION: $ => CI('union'),
@@ -1935,8 +1912,6 @@ module.exports = grammar({
     FILTER: $ => CI('filter'),
 
     RANGE: $ => CI('range'),
-
-    ROWS: $ => CI('rows'),
 
     GROUPS: $ => CI('groups'),
 
