@@ -1560,18 +1560,6 @@ module.exports = grammar({
 
     keep_table_name_in_aliases_stmt: $ => $.AT_KEEP_TABLE_NAME_IN_ALIASES,
 
-    expr_macro_def: $ => seq($.AT_MACRO, '(', $.EXPR, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
-    stmt_list_macro_def: $ => seq($.AT_MACRO, '(', $.STMT_LIST, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
-    query_parts_macro_def: $ => seq($.AT_MACRO, '(', $.QUERY_PARTS, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
-    cte_tables_macro_def: $ => seq($.AT_MACRO, '(', $.CTE_TABLES, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
-    select_core_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_CORE, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
-    select_expr_macro_def: $ => seq($.AT_MACRO, '(', $.SELECT_EXPR, ')', $.name, '!', '(', optional($.macro_formals), ')'),
-
     op_stmt: $ => choice(
       seq($.AT_OP, $.data_type_any, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name),
       seq($.AT_OP, $.CURSOR, ':', $.loose_name, $.loose_name_or_type, $.AS, $.loose_name),
@@ -1586,12 +1574,84 @@ module.exports = grammar({
       seq($.AT_IFNDEF, $.name, optional($.stmt_list), $.AT_ENDIF)),
 
     macro_def_stmt: $ => choice(
-      seq($.expr_macro_def, $.BEGIN, $.expr, $.END),
-      seq($.stmt_list_macro_def, $.BEGIN, $.stmt_list, $.END),
-      seq($.query_parts_macro_def, $.BEGIN, $.query_parts, $.END),
-      seq($.cte_tables_macro_def, $.BEGIN, $.cte_tables, $.END),
-      seq($.select_core_macro_def, $.BEGIN, $.select_core_list, $.END),
-      seq($.select_expr_macro_def, $.BEGIN, $.select_expr_list, $.END)),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.EXPR,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.expr,
+          $.END),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.STMT_LIST,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.stmt_list,
+          $.END),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.QUERY_PARTS,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.query_parts,
+          $.END),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.CTE_TABLES,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.cte_tables,
+          $.END),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.SELECT_CORE,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.select_core_list,
+          $.END),
+      seq(
+          $.AT_MACRO,
+          '(',
+          $.SELECT_EXPR,
+          ')',
+          $.name,
+          '!',
+          '(',
+          optional($.macro_formals),
+          ')',
+          $.BEGIN,
+          $.select_expr_list,
+          $.END)),
 
     macro_arg: $ => choice(
       $.expr,
@@ -2103,8 +2163,6 @@ module.exports = grammar({
 
     AT_KEEP_TABLE_NAME_IN_ALIASES: $ => CI('@keep_table_name_in_aliases'),
 
-    AT_MACRO: $ => CI('@macro'),
-
     AT_OP: $ => CI('@op'),
 
     AT_IFDEF: $ => CI('@ifdef'),
@@ -2114,6 +2172,8 @@ module.exports = grammar({
     AT_ENDIF: $ => CI('@endif'),
 
     AT_IFNDEF: $ => CI('@ifndef'),
+
+    AT_MACRO: $ => CI('@macro'),
 
 /* This has to go last so that it is less favorable than keywords */
     ID: $ => /[_A-Za-z][A-Za-z0-9_]*/,
