@@ -14,6 +14,10 @@ Java, C#, and Objective-C.
 
 This tree-sitter grammar is automatically generated from the Bison grammar that
 specifies CG/SQL.  The project and its documentation can be found [here](https://github.com/ricomariani/CG-SQL-author).
+The script used to to generate the grammar can be found [here](https://github.com/ricomariani/CG-SQL-author/blob/main/scripts/make_ts.sh)
+with helper scripts in the `grammar_utils` subdirectly.  The most important part is
+[tree_sitter.py](https://github.com/ricomariani/CG-SQL-author/blob/main/scripts/grammar_utils/tree_sitter.py).
+
 
 ### Grammar Diagrams
 - [Language Railroad Diagrams](https://ricomariani.github.io/CG-SQL-author/cql_grammar.railroad.html)
