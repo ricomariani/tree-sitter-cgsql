@@ -6,6 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/* This file is automatically created by tree_sitter.py in the CG/SQL
+ * project. Manual editing here is not advised.  The generator is
+ * located at https://github.com/ricomariani/CG-SQL-author in the
+ * scripts/grammar_utils/tree_sitter.py file
+ */
+
 module.exports = grammar({
   name: 'cql',
   extras: $ => [
@@ -110,7 +116,6 @@ module.exports = grammar({
       $.fetch_call_stmt,
       $.fetch_stmt,
       $.fetch_values_stmt,
-      $.fetch_cursor_from_blob_stmt,
       $.guard_stmt,
       $.if_stmt,
       $.insert_stmt,
@@ -1163,15 +1168,24 @@ module.exports = grammar({
     declare_proc_no_check_stmt: $ => seq($.DECLARE, $.procedure, $.loose_name, $.NO, $.CHECK),
 
     declare_proc_stmt: $ => choice(
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')'),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', '(', $.typed_names, ')'),
-      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.params), ')', $.USING, $.TRANSACTION),
+      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.func_params), ')'),
       seq(
           $.DECLARE,
           $.procedure,
           $.loose_name,
           '(',
-          optional($.params),
+          optional($.func_params),
+          ')',
+          '(',
+          $.typed_names,
+          ')'),
+      seq($.DECLARE, $.procedure, $.loose_name, '(', optional($.func_params), ')', $.USING, $.TRANSACTION),
+      seq(
+          $.DECLARE,
+          $.procedure,
+          $.loose_name,
+          '(',
+          optional($.func_params),
           ')',
           $.OUT,
           '(',
@@ -1182,7 +1196,7 @@ module.exports = grammar({
           $.procedure,
           $.loose_name,
           '(',
-          optional($.params),
+          optional($.func_params),
           ')',
           $.OUT,
           '(',
@@ -1195,7 +1209,7 @@ module.exports = grammar({
           $.procedure,
           $.loose_name,
           '(',
-          optional($.params),
+          optional($.func_params),
           ')',
           $.OUT,
           $.UNION,
@@ -1207,7 +1221,7 @@ module.exports = grammar({
           $.procedure,
           $.loose_name,
           '(',
-          optional($.params),
+          optional($.func_params),
           ')',
           $.OUT,
           $.UNION,
@@ -1346,8 +1360,6 @@ module.exports = grammar({
     fetch_stmt: $ => choice(
       seq($.FETCH, $.name, $.INTO, $.name_list),
       seq($.FETCH, $.name)),
-
-    fetch_cursor_from_blob_stmt: $ => seq($.FETCH, $.name, $.FROM_BLOB, $.expr),
 
     fetch_values_stmt: $ => choice(
       seq(
@@ -2098,8 +2110,6 @@ module.exports = grammar({
     CATCH: $ => CI('catch'),
 
     CONTINUE: $ => CI('continue'),
-
-    FROM_BLOB: $ => prec.left(1, seq(CI('from'), CI('blob'))),
 
     CLOSE: $ => CI('close'),
 
