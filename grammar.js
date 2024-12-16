@@ -61,14 +61,6 @@ module.exports = grammar({
       $.expr_stmt,
       $.begin_schema_region_stmt,
       $.begin_trans_stmt,
-      $.blob_get_key_type_stmt,
-      $.blob_get_val_type_stmt,
-      $.blob_get_key_stmt,
-      $.blob_get_val_stmt,
-      $.blob_create_key_stmt,
-      $.blob_create_val_stmt,
-      $.blob_update_key_stmt,
-      $.blob_update_val_stmt,
       $.call_stmt,
       $.close_stmt,
       $.commit_return_stmt,
@@ -429,7 +421,48 @@ module.exports = grammar({
       $.CTE_TABLES,
       $.SELECT_CORE,
       $.SELECT_EXPR,
-      seq($.AT_ID, '(', $.text_args, ')')),
+      seq($.AT_ID, '(', $.text_args, ')'),
+      seq($.AT_TMP, '(', $.text_args, ')'),
+      $.ABORT,
+      $.ACTION,
+      $.ALTER,
+      $.ASC,
+      $.AUTOINCREMENT,
+      $.CASCADE,
+      $.CREATE,
+      $.DEFAULT,
+      $.DEFERRABLE,
+      $.DEFERRED,
+      $.DELETE,
+      $.DESC,
+      $.DROP,
+      $.ENCODE,
+      $.EXCLUSIVE,
+      $.EXPLAIN,
+      $.FAIL,
+      $.FETCH,
+      $.FOLLOWING,
+      $.GROUPS,
+      $.IGNORE,
+      $.IMMEDIATE,
+      $.INITIALLY,
+      $.INSTEAD,
+      $.INTO,
+      $.NULLS,
+      $.OUTER,
+      $.PARTITION,
+      $.PRECEDING,
+      $.RANGE,
+      $.REFERENCES,
+      $.RELEASE,
+      $.RENAME,
+      $.RESTRICT,
+      $.SAVEPOINT,
+      $.STATEMENT,
+      $.TABLE,
+      $.TEMP,
+      $.TRANSACTION,
+      $.WITHOUT),
 
     loose_name: $ => prec.left(100, choice(
       $.name,
@@ -723,7 +756,7 @@ module.exports = grammar({
       seq($.cte_table, ',', $.cte_tables)),
 
     cte_decl: $ => prec.left(1, choice(
-      seq($.name, '(', $.name_list, ')'),
+      seq($.name, '(', $.sql_name_list, ')'),
       seq($.name, '(', '*', ')'),
       $.name)),
 
@@ -1552,24 +1585,6 @@ module.exports = grammar({
 
     enforce_pop_stmt: $ => $.AT_ENFORCE_POP,
 
-    opt_use_offset: $ => $.OFFSET,
-
-    blob_get_key_type_stmt: $ => seq($.AT_BLOB_GET_KEY_TYPE, $.name),
-
-    blob_get_val_type_stmt: $ => seq($.AT_BLOB_GET_VAL_TYPE, $.name),
-
-    blob_get_key_stmt: $ => seq($.AT_BLOB_GET_KEY, $.name, optional($.opt_use_offset)),
-
-    blob_get_val_stmt: $ => seq($.AT_BLOB_GET_VAL, $.name, optional($.opt_use_offset)),
-
-    blob_create_key_stmt: $ => seq($.AT_BLOB_CREATE_KEY, $.name, optional($.opt_use_offset)),
-
-    blob_create_val_stmt: $ => seq($.AT_BLOB_CREATE_VAL, $.name, optional($.opt_use_offset)),
-
-    blob_update_key_stmt: $ => seq($.AT_BLOB_UPDATE_KEY, $.name, optional($.opt_use_offset)),
-
-    blob_update_val_stmt: $ => seq($.AT_BLOB_UPDATE_VAL, $.name, optional($.opt_use_offset)),
-
     keep_table_name_in_aliases_stmt: $ => $.AT_KEEP_TABLE_NAME_IN_ALIASES,
 
     op_stmt: $ => choice(
@@ -1845,6 +1860,48 @@ module.exports = grammar({
 
     AT_ID: $ => CI('@id'),
 
+    AT_TMP: $ => CI('@tmp'),
+
+    ALTER: $ => CI('alter'),
+
+    ASC: $ => CI('asc'),
+
+    AUTOINCREMENT: $ => CI('autoincrement'),
+
+    DESC: $ => CI('desc'),
+
+    ENCODE: $ => CI('encode'),
+
+    EXCLUSIVE: $ => CI('exclusive'),
+
+    FETCH: $ => CI('fetch'),
+
+    GROUPS: $ => CI('groups'),
+
+    INSTEAD: $ => CI('instead'),
+
+    INTO: $ => CI('into'),
+
+    NULLS: $ => CI('nulls'),
+
+    OUTER: $ => CI('outer'),
+
+    PARTITION: $ => CI('partition'),
+
+    PRECEDING: $ => CI('preceding'),
+
+    RANGE: $ => CI('range'),
+
+    RELEASE: $ => CI('release'),
+
+    RENAME: $ => CI('rename'),
+
+    SAVEPOINT: $ => CI('savepoint'),
+
+    STATEMENT: $ => CI('statement'),
+
+    TRANSACTION: $ => CI('transaction'),
+
     CALL: $ => CI('call'),
 
     BOOL: $ => CI('bool'),
@@ -1864,8 +1921,6 @@ module.exports = grammar({
     LEFT: $ => CI('left'),
 
     ALL: $ => CI('all'),
-
-    AUTOINCREMENT: $ => CI('autoincrement'),
 
     COLLATE: $ => CI('collate'),
 
@@ -1983,10 +2038,6 @@ module.exports = grammar({
 
     FILTER: $ => CI('filter'),
 
-    RANGE: $ => CI('range'),
-
-    GROUPS: $ => CI('groups'),
-
     EXCLUDE_NO_OTHERS: $ => prec.left(1, seq(CI('exclude'), CI('no'), CI('others'))),
 
     EXCLUDE_CURRENT_ROW: $ => prec.left(1, seq(CI('exclude'), CI('current'), CI('row'))),
@@ -1997,11 +2048,7 @@ module.exports = grammar({
 
     UNBOUNDED: $ => CI('unbounded'),
 
-    PRECEDING: $ => CI('preceding'),
-
     CURRENT_ROW: $ => prec.left(1, seq(CI('current'), CI('row'))),
-
-    PARTITION: $ => CI('partition'),
 
     BY: $ => CI('by'),
 
@@ -2031,12 +2078,6 @@ module.exports = grammar({
 
     GROUP: $ => CI('group'),
 
-    ASC: $ => CI('asc'),
-
-    DESC: $ => CI('desc'),
-
-    NULLS: $ => CI('nulls'),
-
     HAVING: $ => CI('having'),
 
     ORDER: $ => CI('order'),
@@ -2046,8 +2087,6 @@ module.exports = grammar({
     OFFSET: $ => CI('offset'),
 
     DISTINCTROW: $ => CI('distinctrow'),
-
-    OUTER: $ => CI('outer'),
 
     INNER: $ => CI('inner'),
 
@@ -2062,8 +2101,6 @@ module.exports = grammar({
     AT_DUMMY_DEFAULTS: $ => CI('@dummy_defaults'),
 
     INSERT: $ => CI('insert'),
-
-    INTO: $ => CI('into'),
 
     DO: $ => CI('do'),
 
@@ -2083,13 +2120,9 @@ module.exports = grammar({
 
     PROCEDURE: $ => CI('procedure'),
 
-    TRANSACTION: $ => CI('transaction'),
-
     INTERFACE: $ => CI('interface'),
 
     INOUT: $ => CI('inout'),
-
-    FETCH: $ => CI('fetch'),
 
     VAR: $ => CI('var'),
 
@@ -2113,29 +2146,15 @@ module.exports = grammar({
 
     CLOSE: $ => CI('close'),
 
-    EXCLUSIVE: $ => CI('exclusive'),
-
     TO: $ => CI('to'),
 
-    SAVEPOINT: $ => CI('savepoint'),
-
-    RELEASE: $ => CI('release'),
-
     AT_ECHO: $ => CI('@echo'),
-
-    ALTER: $ => CI('alter'),
-
-    INSTEAD: $ => CI('instead'),
 
     OF: $ => CI('of'),
 
     FOR_EACH_ROW: $ => prec.left(1, seq(CI('for'), CI('each'), CI('row'))),
 
     UPSERT: $ => CI('upsert'),
-
-    STATEMENT: $ => CI('statement'),
-
-    ENCODE: $ => CI('encode'),
 
     CONTEXT_COLUMN: $ => prec.left(1, seq(CI('context'), CI('column'))),
 
@@ -2154,22 +2173,6 @@ module.exports = grammar({
     AT_ENFORCE_PUSH: $ => CI('@enforce_push'),
 
     AT_ENFORCE_POP: $ => CI('@enforce_pop'),
-
-    AT_BLOB_GET_KEY_TYPE: $ => CI('@blob_get_key_type'),
-
-    AT_BLOB_GET_VAL_TYPE: $ => CI('@blob_get_val_type'),
-
-    AT_BLOB_GET_KEY: $ => CI('@blob_get_key'),
-
-    AT_BLOB_GET_VAL: $ => CI('@blob_get_val'),
-
-    AT_BLOB_CREATE_KEY: $ => CI('@blob_create_key'),
-
-    AT_BLOB_CREATE_VAL: $ => CI('@blob_create_val'),
-
-    AT_BLOB_UPDATE_KEY: $ => CI('@blob_update_key'),
-
-    AT_BLOB_UPDATE_VAL: $ => CI('@blob_update_val'),
 
     AT_KEEP_TABLE_NAME_IN_ALIASES: $ => CI('@keep_table_name_in_aliases'),
 
