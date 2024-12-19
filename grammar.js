@@ -140,7 +140,6 @@ module.exports = grammar({
       $.upsert_stmt,
       $.while_stmt,
       $.with_delete_stmt,
-      $.with_insert_stmt,
       $.with_update_stmt,
       $.with_upsert_stmt,
       $.keep_table_name_in_aliases_stmt),
@@ -154,7 +153,6 @@ module.exports = grammar({
       $.update_stmt,
       $.delete_stmt,
       $.with_delete_stmt,
-      $.with_insert_stmt,
       $.with_update_stmt,
       $.with_upsert_stmt,
       $.insert_stmt,
@@ -398,38 +396,20 @@ module.exports = grammar({
 
     name: $ => choice(
       $.ID,
-      $.TEXT,
-      $.TRIGGER,
-      $.ROWID,
-      $.REPLACE,
-      $.KEY,
-      $.VIRTUAL,
-      $.TYPE,
-      $.HIDDEN,
-      $.PRIVATE,
-      $.FIRST,
-      $.LAST,
-      $.ADD,
-      $.AFTER,
-      $.BEFORE,
-      $.VIEW,
-      $.INDEX,
-      $.COLUMN,
-      $.EXPR,
-      $.STMT_LIST,
-      $.QUERY_PARTS,
-      $.CTE_TABLES,
-      $.SELECT_CORE,
-      $.SELECT_EXPR,
-      seq($.AT_ID, '(', $.text_args, ')'),
-      seq($.AT_TMP, '(', $.text_args, ')'),
       $.ABORT,
       $.ACTION,
+      $.ADD,
+      $.AFTER,
       $.ALTER,
       $.ASC,
+      seq($.AT_ID, '(', $.text_args, ')'),
+      seq($.AT_TMP, '(', $.text_args, ')'),
       $.AUTOINCREMENT,
+      $.BEFORE,
       $.CASCADE,
+      $.COLUMN,
       $.CREATE,
+      $.CTE_TABLES,
       $.DEFAULT,
       $.DEFERRABLE,
       $.DEFERRED,
@@ -439,29 +419,47 @@ module.exports = grammar({
       $.ENCODE,
       $.EXCLUSIVE,
       $.EXPLAIN,
+      $.EXPR,
       $.FAIL,
       $.FETCH,
+      $.FIRST,
       $.FOLLOWING,
       $.GROUPS,
+      $.HIDDEN,
       $.IGNORE,
       $.IMMEDIATE,
+      $.INDEX,
       $.INITIALLY,
       $.INSTEAD,
       $.INTO,
+      $.KEY,
+      $.LAST,
       $.NULLS,
       $.OUTER,
       $.PARTITION,
       $.PRECEDING,
+      $.PRIVATE,
+      $.QUERY_PARTS,
       $.RANGE,
       $.REFERENCES,
       $.RELEASE,
       $.RENAME,
+      $.REPLACE,
       $.RESTRICT,
+      $.ROWID,
       $.SAVEPOINT,
+      $.SELECT_CORE,
+      $.SELECT_EXPR,
       $.STATEMENT,
+      $.STMT_LIST,
       $.TABLE,
       $.TEMP,
+      $.TEXT,
       $.TRANSACTION,
+      $.TRIGGER,
+      $.TYPE,
+      $.VIEW,
+      $.VIRTUAL,
       $.WITHOUT),
 
     loose_name: $ => prec.left(100, choice(
@@ -1035,8 +1033,6 @@ module.exports = grammar({
       seq($.INSERT, $.OR, $.FAIL, $.INTO),
       seq($.REPLACE, $.INTO)),
 
-    with_insert_stmt: $ => seq($.with_prefix, $.insert_stmt),
-
     opt_column_spec: $ => choice(
       seq('(', optional($.sql_name_list), ')'),
       seq('(', $.shape_def, ')')),
@@ -1050,7 +1046,7 @@ module.exports = grammar({
       seq($.FROM, $.name, optional($.opt_column_spec)),
       seq($.FROM, $.ARGUMENTS, optional($.opt_column_spec))),
 
-    insert_stmt: $ => choice(
+    insert_stmt_plain: $ => choice(
       seq(
           $.insert_stmt_type,
           $.sql_name,
@@ -1066,6 +1062,14 @@ module.exports = grammar({
       seq($.insert_stmt_type, $.sql_name, $.DEFAULT, $.VALUES),
       seq($.insert_stmt_type, $.sql_name, $.USING, $.select_stmt),
       seq($.insert_stmt_type, $.sql_name, $.USING, $.expr_names, optional($.opt_insert_dummy_spec))),
+
+    returning_suffix: $ => seq($.RETURNING, '(', $.select_expr_list, ')'),
+
+    insert_stmt: $ => choice(
+      $.insert_stmt_plain,
+      seq($.insert_stmt_plain, $.returning_suffix),
+      seq($.with_prefix, $.insert_stmt_plain),
+      seq($.with_prefix, $.insert_stmt_plain, $.returning_suffix)),
 
     insert_list_item: $ => choice(
       $.expr,
@@ -1118,8 +1122,8 @@ module.exports = grammar({
     with_upsert_stmt: $ => seq($.with_prefix, $.upsert_stmt),
 
     upsert_stmt: $ => choice(
-      seq($.insert_stmt, $.ON_CONFLICT, optional($.conflict_target), $.DO, $.NOTHING),
-      seq($.insert_stmt, $.ON_CONFLICT, optional($.conflict_target), $.DO, $.basic_update_stmt)),
+      seq($.insert_stmt_plain, $.ON_CONFLICT, optional($.conflict_target), $.DO, $.NOTHING),
+      seq($.insert_stmt_plain, $.ON_CONFLICT, optional($.conflict_target), $.DO, $.basic_update_stmt)),
 
     update_cursor_stmt: $ => choice(
       seq(
@@ -1321,13 +1325,15 @@ module.exports = grammar({
       seq($.DECLARE, $.name, $.CURSOR, $.LIKE, '(', $.typed_names, ')'),
       seq($.CURSOR, $.name, $.LIKE, '(', $.typed_names, ')')),
 
+    row_source: $ => choice(
+      $.select_stmt,
+      $.explain_stmt,
+      $.insert_stmt,
+      $.call_stmt),
+
     declare_forward_read_cursor_stmt: $ => choice(
-      seq($.DECLARE, $.name, $.CURSOR, $.FOR, $.select_stmt),
-      seq($.CURSOR, $.name, $.FOR, $.select_stmt),
-      seq($.DECLARE, $.name, $.CURSOR, $.FOR, $.explain_stmt),
-      seq($.CURSOR, $.name, $.FOR, $.explain_stmt),
-      seq($.DECLARE, $.name, $.CURSOR, $.FOR, $.call_stmt),
-      seq($.CURSOR, $.name, $.FOR, $.call_stmt),
+      seq($.DECLARE, $.name, $.CURSOR, $.FOR, $.row_source),
+      seq($.CURSOR, $.name, $.FOR, $.row_source),
       seq($.DECLARE, $.name, $.CURSOR, $.FOR, $.expr),
       seq($.CURSOR, $.name, $.FOR, $.expr)),
 
@@ -1826,47 +1832,25 @@ module.exports = grammar({
 
     UNIQUE: $ => CI('unique'),
 
-    TEXT: $ => CI('text'),
-
-    TYPE: $ => CI('type'),
-
-    HIDDEN: $ => CI('hidden'),
-
-    PRIVATE: $ => CI('private'),
-
-    FIRST: $ => CI('first'),
-
-    LAST: $ => CI('last'),
-
     ADD: $ => CI('add'),
 
     AFTER: $ => CI('after'),
-
-    BEFORE: $ => CI('before'),
-
-    COLUMN: $ => CI('column'),
-
-    EXPR: $ => CI('expr'),
-
-    STMT_LIST: $ => CI('stmt_list'),
-
-    QUERY_PARTS: $ => CI('query_parts'),
-
-    CTE_TABLES: $ => CI('cte_tables'),
-
-    SELECT_CORE: $ => CI('select_core'),
-
-    SELECT_EXPR: $ => CI('select_expr'),
-
-    AT_ID: $ => CI('@id'),
-
-    AT_TMP: $ => CI('@tmp'),
 
     ALTER: $ => CI('alter'),
 
     ASC: $ => CI('asc'),
 
+    AT_ID: $ => CI('@id'),
+
+    AT_TMP: $ => CI('@tmp'),
+
     AUTOINCREMENT: $ => CI('autoincrement'),
+
+    BEFORE: $ => CI('before'),
+
+    COLUMN: $ => CI('column'),
+
+    CTE_TABLES: $ => CI('cte_tables'),
 
     DESC: $ => CI('desc'),
 
@@ -1874,13 +1858,21 @@ module.exports = grammar({
 
     EXCLUSIVE: $ => CI('exclusive'),
 
+    EXPR: $ => CI('expr'),
+
     FETCH: $ => CI('fetch'),
 
+    FIRST: $ => CI('first'),
+
     GROUPS: $ => CI('groups'),
+
+    HIDDEN: $ => CI('hidden'),
 
     INSTEAD: $ => CI('instead'),
 
     INTO: $ => CI('into'),
+
+    LAST: $ => CI('last'),
 
     NULLS: $ => CI('nulls'),
 
@@ -1890,6 +1882,10 @@ module.exports = grammar({
 
     PRECEDING: $ => CI('preceding'),
 
+    PRIVATE: $ => CI('private'),
+
+    QUERY_PARTS: $ => CI('query_parts'),
+
     RANGE: $ => CI('range'),
 
     RELEASE: $ => CI('release'),
@@ -1898,9 +1894,19 @@ module.exports = grammar({
 
     SAVEPOINT: $ => CI('savepoint'),
 
+    SELECT_CORE: $ => CI('select_core'),
+
+    SELECT_EXPR: $ => CI('select_expr'),
+
     STATEMENT: $ => CI('statement'),
 
+    STMT_LIST: $ => CI('stmt_list'),
+
+    TEXT: $ => CI('text'),
+
     TRANSACTION: $ => CI('transaction'),
+
+    TYPE: $ => CI('type'),
 
     CALL: $ => CI('call'),
 
@@ -2101,6 +2107,8 @@ module.exports = grammar({
     AT_DUMMY_DEFAULTS: $ => CI('@dummy_defaults'),
 
     INSERT: $ => CI('insert'),
+
+    RETURNING: $ => CI('returning'),
 
     DO: $ => CI('do'),
 
