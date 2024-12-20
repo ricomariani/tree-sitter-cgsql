@@ -139,7 +139,6 @@ module.exports = grammar({
       $.update_stmt,
       $.upsert_stmt,
       $.while_stmt,
-      $.with_delete_stmt,
       $.with_update_stmt,
       $.with_upsert_stmt,
       $.keep_table_name_in_aliases_stmt),
@@ -152,7 +151,6 @@ module.exports = grammar({
       $.select_stmt,
       $.update_stmt,
       $.delete_stmt,
-      $.with_delete_stmt,
       $.with_update_stmt,
       $.with_upsert_stmt,
       $.insert_stmt,
@@ -1012,9 +1010,13 @@ module.exports = grammar({
           $.select_stmt,
           optional($.opt_delete_version_attr))),
 
-    with_delete_stmt: $ => seq($.with_prefix, $.delete_stmt),
+    delete_stmt: $ => choice(
+      $.delete_stmt_plain,
+      seq($.delete_stmt_plain, $.returning_suffix),
+      seq($.with_prefix, $.delete_stmt_plain),
+      seq($.with_prefix, $.delete_stmt_plain, $.returning_suffix)),
 
-    delete_stmt: $ => seq($.DELETE, $.FROM, $.sql_name, optional($.opt_where)),
+    delete_stmt_plain: $ => seq($.DELETE, $.FROM, $.sql_name, optional($.opt_where)),
 
     opt_insert_dummy_spec: $ => seq($.AT_DUMMY_SEED, '(', $.expr, ')', optional($.dummy_modifier)),
 
@@ -1329,6 +1331,7 @@ module.exports = grammar({
       $.select_stmt,
       $.explain_stmt,
       $.insert_stmt,
+      $.delete_stmt,
       $.call_stmt),
 
     declare_forward_read_cursor_stmt: $ => choice(
