@@ -139,7 +139,6 @@ module.exports = grammar({
       $.update_stmt,
       $.upsert_stmt,
       $.while_stmt,
-      $.with_update_stmt,
       $.with_upsert_stmt,
       $.keep_table_name_in_aliases_stmt),
 
@@ -149,18 +148,17 @@ module.exports = grammar({
 
     explain_target: $ => choice(
       $.select_stmt,
-      $.update_stmt,
-      $.delete_stmt,
-      $.with_update_stmt,
-      $.with_upsert_stmt,
-      $.insert_stmt,
-      $.upsert_stmt,
-      $.drop_table_stmt,
-      $.drop_view_stmt,
-      $.drop_index_stmt,
-      $.drop_trigger_stmt,
       $.begin_trans_stmt,
-      $.commit_trans_stmt),
+      $.commit_trans_stmt,
+      $.delete_stmt,
+      $.drop_index_stmt,
+      $.drop_table_stmt,
+      $.drop_trigger_stmt,
+      $.drop_view_stmt,
+      $.insert_stmt,
+      $.update_stmt,
+      $.upsert_stmt,
+      $.with_upsert_stmt),
 
     previous_schema_stmt: $ => $.AT_PREVIOUS_SCHEMA,
 
@@ -1089,9 +1087,13 @@ module.exports = grammar({
           optional($.opt_from_query_parts),
           optional($.opt_where)),
 
-    with_update_stmt: $ => seq($.with_prefix, $.update_stmt),
-
     update_stmt: $ => choice(
+      $.update_stmt_plain,
+      seq($.update_stmt_plain, $.returning_suffix),
+      seq($.with_prefix, $.update_stmt_plain),
+      seq($.with_prefix, $.update_stmt_plain, $.returning_suffix)),
+
+    update_stmt_plain: $ => choice(
       seq(
           $.UPDATE,
           $.sql_name,
@@ -1332,6 +1334,7 @@ module.exports = grammar({
       $.explain_stmt,
       $.insert_stmt,
       $.delete_stmt,
+      $.update_stmt,
       $.call_stmt),
 
     declare_forward_read_cursor_stmt: $ => choice(
