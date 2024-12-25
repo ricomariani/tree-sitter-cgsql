@@ -738,10 +738,10 @@ module.exports = grammar({
       seq($.col_calc, ',', $.col_calcs)),
 
     col_calc: $ => choice(
-      $.name,
+      $.sql_name,
       $.shape_def,
-      seq($.name, $.shape_def),
-      seq($.name, '.', $.name)),
+      seq($.sql_name, $.shape_def),
+      seq($.sql_name, '.', $.sql_name)),
 
     cte_tables: $ => choice(
       $.cte_table,
@@ -1061,7 +1061,7 @@ module.exports = grammar({
       seq($.insert_stmt_type, $.sql_name, $.USING, $.select_stmt),
       seq($.insert_stmt_type, $.sql_name, $.USING, $.expr_names, optional($.opt_insert_dummy_spec))),
 
-    returning_suffix: $ => seq($.RETURNING, '(', $.select_expr_list, ')'),
+    returning_suffix: $ => seq($.RETURNING, $.select_expr_list),
 
     insert_stmt: $ => choice(
       $.insert_stmt_plain,
