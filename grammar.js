@@ -625,11 +625,13 @@ module.exports = grammar({
       $.raise_expr,
       seq('(', $.select_stmt, ')'),
       seq('(', $.select_stmt, $.IF, $.NOTHING, $.expr, ')'),
-      seq('(', $.select_stmt, $.IF, $.NOTHING, $.THEN, $.expr, ')'),
       seq('(', $.select_stmt, $.IF, $.NOTHING, $.OR, $.NULL, $.expr, ')'),
       seq('(', $.select_stmt, $.IF, $.NOTHING, $.OR, $.NULL, $.THEN, $.expr, ')'),
-      seq('(', $.select_stmt, $.IF, $.NOTHING, $.THROW, ')'),
+      seq('(', $.select_stmt, $.IF, $.NOTHING, $.OR, $.NULL, $.THEN, $.THROW, ')'),
+      seq('(', $.select_stmt, $.IF, $.NOTHING, $.OR, $.NULL, $.THROW, ')'),
+      seq('(', $.select_stmt, $.IF, $.NOTHING, $.THEN, $.expr, ')'),
       seq('(', $.select_stmt, $.IF, $.NOTHING, $.THEN, $.THROW, ')'),
+      seq('(', $.select_stmt, $.IF, $.NOTHING, $.THROW, ')'),
       seq($.EXISTS, '(', $.select_stmt, ')'),
       seq($.CASE, $.expr, $.case_list, $.END),
       seq($.CASE, $.expr, $.case_list, $.ELSE, $.expr, $.END),
@@ -1576,13 +1578,6 @@ module.exports = grammar({
       seq($.SELECT, $.IF, $.NOTHING),
       seq($.INSERT, $.SELECT),
       seq($.TABLE, $.FUNCTION),
-      seq($.ENCODE, $.CONTEXT_COLUMN),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.INTEGER),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.LONG_INTEGER),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.REAL),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.BOOL),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.TEXT),
-      seq($.ENCODE, $.CONTEXT_TYPE, $.BLOB),
       $.IS_TRUE,
       $.CAST,
       $.SIGN_FUNCTION,
@@ -1973,9 +1968,9 @@ module.exports = grammar({
 
     NOTHING: $ => CI('nothing'),
 
-    THEN: $ => CI('then'),
-
     OR: $ => CI('or'),
+
+    THEN: $ => CI('then'),
 
     THROW: $ => CI('throw'),
 
@@ -2172,10 +2167,6 @@ module.exports = grammar({
     FOR_EACH_ROW: $ => prec.left(1, seq(CI('for'), CI('each'), CI('row'))),
 
     UPSERT: $ => CI('upsert'),
-
-    CONTEXT_COLUMN: $ => prec.left(1, seq(CI('context'), CI('column'))),
-
-    CONTEXT_TYPE: $ => prec.left(1, seq(CI('context'), CI('type'))),
 
     SIGN_FUNCTION: $ => prec.left(1, seq(CI('sign'), CI('function'))),
 
