@@ -18,9 +18,7 @@ module.exports = grammar({
      /\s|\r?\n/,
      $.comment
   ],
-  conflicts: $ => [
-     [$.fk_options],
-  ],
+  conflicts: $ => [],
   word: $ => $.ID,
   rules: {
 
@@ -43,7 +41,7 @@ module.exports = grammar({
        seq('--', /(\\(.|\r?\n)|[^\\\n])*/),
        seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/'))),
 
-    stmt_list: $ => repeat1(choice($.stmt, $.include_stmt, $.comment)),
+    stmt_list: $ => prec.left(repeat1(choice($.stmt, $.include_stmt, $.comment))),
 
     macro_ref: $ => choice(
       seq($.ID, '!'),
@@ -139,6 +137,7 @@ module.exports = grammar({
       $.update_stmt,
       $.upsert_stmt,
       $.while_stmt,
+      $.for_stmt,
       $.keep_table_name_in_aliases_stmt),
 
     explain_stmt: $ => seq($.EXPLAIN, optional($.opt_query_plan), $.explain_target),
@@ -330,10 +329,10 @@ module.exports = grammar({
       seq($.ON_CONFLICT, $.IGNORE),
       seq($.ON_CONFLICT, $.REPLACE)),
 
-    fk_options: $ => choice(
+    fk_options: $ => prec.left(choice(
       $.fk_on_options,
       $.fk_deferred_options,
-      seq($.fk_on_options, $.fk_deferred_options)),
+      seq($.fk_on_options, $.fk_deferred_options))),
 
     fk_on_options: $ => choice(
       seq($.ON, $.DELETE, $.fk_action),
@@ -1362,6 +1361,8 @@ module.exports = grammar({
       $.declare_value_cursor),
 
     call_stmt: $ => seq($.CALL, $.loose_name, '(', optional($.arg_list), ')'),
+
+    for_stmt: $ => seq($.FOR, $.expr, ';', $.stmt_list, $.BEGIN, optional($.stmt_list), $.END),
 
     while_stmt: $ => seq($.WHILE, $.expr, $.BEGIN, optional($.stmt_list), $.END),
 
