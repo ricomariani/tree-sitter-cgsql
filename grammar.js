@@ -13,7 +13,7 @@
  */
 
 module.exports = grammar({
-  name: 'cql',
+  name: 'cgsql',
   extras: $ => [
      /\s|\r?\n/,
      $.comment
