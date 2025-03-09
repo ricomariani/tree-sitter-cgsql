@@ -13,7 +13,7 @@
  */
 
 module.exports = grammar({
-  name: 'cgsql',
+  name: 'cql',
   extras: $ => [
      /\s|\r?\n/,
      $.comment
@@ -1154,7 +1154,9 @@ module.exports = grammar({
 
     declare_out_call_stmt: $ => seq($.DECLARE, $.OUT, $.call_stmt),
 
-    declare_enum_stmt: $ => seq($.DECLARE, $.ENUM, $.name, $.data_type_numeric, '(', $.enum_values, ')'),
+    declare_enum_stmt: $ => choice(
+      seq($.DECLARE, $.ENUM, $.name, $.data_type_numeric, '(', $.enum_values, ')'),
+      seq($.ENUM, $.name, $.data_type_numeric, '(', $.enum_values, ')')),
 
     enum_values: $ => choice(
       $.enum_value,
@@ -1164,9 +1166,13 @@ module.exports = grammar({
       $.name,
       seq($.name, '=', $.expr)),
 
-    declare_const_stmt: $ => seq($.DECLARE, $.CONST, $.GROUP, $.name, '(', $.const_values, ')'),
+    declare_const_stmt: $ => choice(
+      seq($.DECLARE, $.CONST, $.GROUP, $.name, '(', $.const_values, ')'),
+      seq($.CONST, $.GROUP, $.name, '(', $.const_values, ')')),
 
-    declare_group_stmt: $ => seq($.DECLARE, $.GROUP, $.name, $.BEGIN, $.simple_variable_decls, $.END),
+    declare_group_stmt: $ => choice(
+      seq($.DECLARE, $.GROUP, $.name, $.BEGIN, $.simple_variable_decls, $.END),
+      seq($.GROUP, $.name, $.BEGIN, $.simple_variable_decls, $.END)),
 
     simple_variable_decls: $ => choice(
       seq($.declare_vars_stmt, ';'),
